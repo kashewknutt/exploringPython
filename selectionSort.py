@@ -8,7 +8,14 @@ def selectionSort(data):
         
     return data
 
-data=[23,21,23,12,24]
+
+print("Enter your array: [any character for exit]")
+data = []
+while True:
+    a = input("::->")
+    if a.lstrip('-').isdigit() == True:
+        break
+    data.append(int(a))
 print(selectionSort(data))
         
                 
