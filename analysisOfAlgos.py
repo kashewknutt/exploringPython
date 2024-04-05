@@ -99,6 +99,7 @@ def fractional_knapsack(weights, values, capacity):
 def job_sequencing(jobs):
     jobs.sort(key=lambda x: x[2], reverse=True)  # Sort jobs by profit in descending order
     max_deadline = max(jobs, key=lambda x: x[1])[1]  # Find max deadline
+    print("max deadline: ", max_deadline)
     slots = [-1] * max_deadline
     for job in jobs:
         deadline = job[1] - 1
