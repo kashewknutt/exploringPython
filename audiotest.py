@@ -1,5 +1,8 @@
 from vosk import Model, KaldiRecognizer
 import pyaudio
+import threading
+
+thread = threading.Thread(target=talk)
 
 model = Model("./Vosk/vosk-model-small-en-in-0.4")
 recognizer = KaldiRecognizer(model, 16000)
@@ -20,4 +23,6 @@ def talk():
             print(f"' {text[14:-3]} '")
             return(f"' {text[14:-3]} '")
             break
+
+
 
