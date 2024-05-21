@@ -4,18 +4,29 @@ import sys
 from pygame.locals import *
 import random
 import time
+
+
 #initializing the pygame
 pygame.init()
+
+
 #setting the screen size
-screen = pygame.display.set_mode((600, 600))
+screen = pygame.display.set_mode((600, 600)) # creates a window
+
+
+
 #setting the title of the screen
 pygame.display.set_caption("Snake Game")
+
+
 #setting the color
 red = pygame.Color(255, 0, 0)
 green = pygame.Color(0, 255, 0)
 blue = pygame.Color(0, 0, 255)
 black = pygame.Color(0, 0, 0)
 white = pygame.Color(255, 255, 255)
+
+
 #initializing the variables
 fps = pygame.time.Clock()
 snakePos = [100, 50]
@@ -25,6 +36,8 @@ foodSpawn = True
 direction = 'RIGHT'
 changeTo = direction
 score = 0
+
+
 #game over function
 def gameOver():
     myFont = pygame.font.SysFont('monaco', 72)
@@ -37,6 +50,8 @@ def gameOver():
     time.sleep(4)
     pygame.quit()
     sys.exit()
+
+
 #show score function
 def showScore(choice=1):
     sFont = pygame.font.SysFont('monaco', 24)
@@ -47,9 +62,11 @@ def showScore(choice=1):
     else:
         Srect.midtop = (300, 100)
     screen.blit(Ssurf, Srect)
+
+
 #main logic of the game
-while True:
-    for event in pygame.event.get():
+while True: #step 2 which is the infinite game loop
+    for event in pygame.event.get(): # step 3 event listner
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
