@@ -6,7 +6,7 @@ COLORS = {
     'dull_yellow': (40, 86, 97),    # BGR values for dull yellow
     'whitish_grey': (67, 77, 81),  # BGR values for whitish grey
     'aqua_bluish_green': (67, 70, 37),  # BGR values for aqua bluish green
-    'orange_ping_pong': (182, 201, 255),  # BGR values for orange ping pong
+    'orange_ping_pong': (87, 115, 218),  # BGR values for orange ping pong
 }
 
 # Define quadrants with adjusted coordinates
@@ -83,6 +83,10 @@ def detect_and_track_balls(frame):
                 # Calculate centroid of the ball
                 M = cv2.moments(c)
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+                
+                # Draw a circle around the detected ball
+                cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)  # Draw circle in yellow color
+                cv2.circle(frame, center, 5, (0, 0, 255), -1)  # Draw centroid as a red dot
                 
                 # Update ball information (ID, color, current quadrant, etc.)
                 ball_id = len(balls) + 1
