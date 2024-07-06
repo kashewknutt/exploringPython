@@ -49,9 +49,9 @@ def calculate_timestamp(frame_number):
 def detect_and_track_balls(frame):
     # Convert frame to HSV for color detection
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    
     # Track balls of predefined colors
     for color_name, color_value in COLORS.items():
+        lower_color, upper_color = np.zeros(color_value), np.zeros(color_value)
         # Define color range for detection (adjust as needed for accuracy)
         if color_name == 'dull_yellow':
             lower_color = np.array(color_value) - np.array([20, 50, 50])
@@ -188,11 +188,24 @@ while cap.isOpened():
         quadrant_number = event['quadrant_number']
         ball_color = event['ball_color']
         event_type = event['event_type']
-        
+        print(ball_color)
         # Display event on frame
-        overlay_text(frame, f"{event_type} - {ball_color}", (20, 50))
-        overlay_text(frame, f"Quadrant: {quadrant_number}", (20, 100))
-        overlay_text(frame, f"Time: {timestamp:.2f} seconds", (20, 150))
+        if ball_color == "dull_yellow":
+            overlay_text(frame, f"dull yellow - {event_type}", (20, 50))
+            overlay_text(frame, f"Quadrant: {quadrant_number}", (20, 100))
+            overlay_text(frame, f"Time: {timestamp:.2f} seconds", (20, 150))
+        if ball_color == "whitish_grey":
+            overlay_text(frame, f"whitish grey - {event_type}", (20, 200))
+            overlay_text(frame, f"Quadrant: {quadrant_number}", (20, 250))
+            overlay_text(frame, f"Time: {timestamp:.2f} seconds", (20, 300))
+        if ball_color == "aqua_bluish_green":
+            overlay_text(frame, f"aqua bluish green - {event_type}", (20, 350))
+            overlay_text(frame, f"Quadrant: {quadrant_number}", (20, 400))
+            overlay_text(frame, f"Time: {timestamp:.2f} seconds", (20, 450))
+        if ball_color == "orange_ping_pong":
+            overlay_text(frame, f"orange ping pong - {event_type}", (20, 500))
+            overlay_text(frame, f"Quadrant: {quadrant_number}", (20, 550))
+            overlay_text(frame, f"Time: {timestamp:.2f} seconds", (20, 600))
     
     # Write the frame with overlays to the output video
     out.write(frame)
