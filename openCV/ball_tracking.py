@@ -3,19 +3,19 @@ import numpy as np
 
 # Define constants for colors (BGR format)
 COLORS = {
-    'red': (0, 0, 255),
-    'blue': (255, 0, 0),
-    'green': (0, 255, 0),
-    # Add more colors as needed
+    'dull_yellow': (40, 86, 97),    # BGR values for dull yellow
+    'whitish_grey': (67, 77, 81),  # BGR values for whitish grey
+    'aqua_bluish_green': (67, 70, 37),  # BGR values for aqua bluish green
+    'orange_ping_pong': (182, 201, 255),  # BGR values for orange ping pong
 }
 
-# Define quadrants (example)
+# Define quadrants with adjusted coordinates
 # Format: (top-left x, top-left y, width, height)
 QUADRANTS = {
-    1: (50, 50, 200, 200),
-    2: (300, 50, 200, 200),
-    3: (50, 300, 200, 200),
-    4: (300, 300, 200, 200),
+    1: (520, 300, 205, 260),
+    2: (330, 300, 180, 260),
+    3: (330, 13, 180, 267),
+    4: (520, 14, 205, 265),
 }
 
 # Video file path
@@ -52,19 +52,21 @@ def detect_and_track_balls(frame):
     
     # Track balls of predefined colors
     for color_name, color_value in COLORS.items():
-        # Define color range for detection (example for red balls)
-        if color_name == 'red':
-            lower_color = np.array([0, 100, 100])
-            upper_color = np.array([10, 255, 255])
-            mask1 = cv2.inRange(hsv, lower_color, upper_color)
-            lower_color = np.array([160, 100, 100])
-            upper_color = np.array([179, 255, 255])
-            mask2 = cv2.inRange(hsv, lower_color, upper_color)
-            mask = mask1 + mask2
-        else:
-            lower_color = np.array([50, 100, 100])
-            upper_color = np.array([70, 255, 255])
-            mask = cv2.inRange(hsv, lower_color, upper_color)
+        # Define color range for detection (adjust as needed for accuracy)
+        if color_name == 'dull_yellow':
+            lower_color = np.array(color_value) - np.array([20, 50, 50])
+            upper_color = np.array(color_value) + np.array([20, 50, 50])
+        elif color_name == 'whitish_grey':
+            lower_color = np.array(color_value) - np.array([10, 20, 20])
+            upper_color = np.array(color_value) + np.array([10, 20, 20])
+        elif color_name == 'aqua_bluish_green':
+            lower_color = np.array(color_value) - np.array([10, 50, 50])
+            upper_color = np.array(color_value) + np.array([10, 50, 50])
+        elif color_name == 'orange_ping_pong':
+            lower_color = np.array(color_value) - np.array([20, 50, 50])
+            upper_color = np.array(color_value) + np.array([20, 50, 50])
+        
+        mask = cv2.inRange(hsv, lower_color, upper_color)
         
         # Find contours in the mask and initialize the centroid of the ball
         contours, _ = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -125,7 +127,14 @@ def detect_entry_exit_events(frame_number):
                     ball_info['last_quadrant'] = quadrant_num
                     break
             else:
-                ball_info['last_quadrant'] = None
+                if ball_info['last_quadrant'] == quadrant_num:
+                    events.append({
+                        'timestamp': calculate_timestamp(frame_number),
+                        'quadrant_number': quadrant_num,
+                        'ball_color': ball_color,
+                        'event_type': 'Exit'
+                    })
+                    ball_info['last_quadrant'] = None
 
 # Function to overlay text on video frame
 def overlay_text(frame, text, position):
@@ -142,7 +151,14 @@ def draw_ball_paths(frame):
 # Function to draw rectangles for each quadrant
 def draw_quadrant_rectangles(frame):
     for quadrant_num, (x, y, w, h) in QUADRANTS.items():
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 255), 2)  # White rectangle
+        if quadrant_num == 1:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 255), 2)  # White rectangle
+        elif quadrant_num == 2:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Green rectangle
+        elif quadrant_num == 3:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 255), 2)  # Violet rectangle
+        elif quadrant_num == 4:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)  # Red rectangle
 
 # Main loop for processing video frames
 frame_number = 0
@@ -205,5 +221,4 @@ with open(output_text_path, 'w') as f:
         f.write(f"Timestamp: {event['timestamp']:.2f}, Quadrant Number: {event['quadrant_number']}, "
                 f"Ball Color: {event['ball_color']}, Type: {event['event_type']}\n")
 
-print("Processing complete. Output video saved at:", output_video_path)
-print("Event logs saved at:", output_text_path)
+print("Processing complete. Output video and event log saved successfully.")
