@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from PIL import Image
 
 # Define constants for colors (BGR format)
 COLORS = {
@@ -103,6 +104,15 @@ def detect_and_track_balls(frame):
         
         mask = cv2.inRange(hsv, lower_color, upper_color)
         
+        mask_ = Image.fromarray(mask)
+        bbox = mask_.getbbox()
+        print(bbox)
+        
+        if bbox is not None:
+            x1, y1, x2, y2 = bbox
+
+            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 5)
+        
         # Find contours in the mask and initialize the centroid of the ball
         contours, _ = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         center = None
@@ -137,6 +147,7 @@ def detect_and_track_balls(frame):
                     # Track movement path of the ball
                     balls[ball_id]['centroid'] = center
                     balls[ball_id]['path'].append(center)
+    return mask
 
 # Function to detect entry and exit events in quadrants
 def detect_entry_exit_events(frame_number):
@@ -211,7 +222,7 @@ while cap.isOpened():
     draw_quadrant_rectangles(frame)
     
     # Process frame: detect and track balls
-    detect_and_track_balls(frame)
+    mask = detect_and_track_balls(frame)
     
     # Detect entry and exit events in quadrants
     detect_entry_exit_events(frame_number)
