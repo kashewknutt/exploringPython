@@ -3,7 +3,7 @@ import numpy as np
 from tensorflow.keras.models import load_model
 
 # Load the trained CNN model
-model = load_model('ball_color_classifier.h5')
+model = load_model('ball_color_classifier_with_color_focus.h5')
 
 # Define constants for colors (for drawing purposes)
 DRAW_COLORS = {
