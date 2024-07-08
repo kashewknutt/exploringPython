@@ -6,9 +6,9 @@ import numpy as np
 import cv2
 import os
 
-# Define the image size and batch size
-IMAGE_SIZE = (64, 64)
+# Define the batch size
 BATCH_SIZE = 32
+IMAGE_SIZE = 64
 
 # Define the colors and their corresponding HSV ranges
 COLORS = {
@@ -30,8 +30,11 @@ def augment_with_color_focus(image):
         processed_image = preprocess_image(image, lower, upper)
         masks.append(processed_image)
     
+    # Resize the original image to IMAGE_SIZE
+    resized_image = cv2.resize(image, IMAGE_SIZE)
+    
     # Concatenate the original image with all the masks as additional channels
-    combined_image = np.concatenate([image] + masks, axis=-1)
+    combined_image = np.concatenate([resized_image] + masks, axis=-1)
     return combined_image
 
 # Custom data generator
@@ -51,8 +54,8 @@ class CustomImageDataGenerator(tf.keras.utils.Sequence):
         batch_image_paths = self.image_paths[index * self.batch_size:(index + 1) * self.batch_size]
         batch_labels = self.labels[index * self.batch_size:(index + 1) * self.batch_size]
 
-        images = [cv2.resize(cv2.imread(img_path), self.target_size) for img_path in batch_image_paths]
-        processed_images = [augment_with_color_focus(img) for img in images]
+        images = [cv2.imread(img_path) for img_path in batch_image_paths]
+        processed_images = [augment_with_color_focus(img, self.target_size) for img in images]
 
         X = np.array(processed_images, dtype=np.float32) / 255.0
         y = tf.keras.utils.to_categorical(batch_labels, self.num_classes)
@@ -66,43 +69,19 @@ class CustomImageDataGenerator(tf.keras.utils.Sequence):
         self.image_paths = np.array(self.image_paths)[p]
         self.labels = np.array(self.labels)[p]
 
-# Prepare image paths and labels
-data_dir = 'data'  # Adjust this path as needed
-classes = os.listdir(data_dir)
-image_paths = []
-labels = []
-
-for idx, class_name in enumerate(classes):
-    class_dir = os.path.join(data_dir, class_name)
-    for image_name in os.listdir(class_dir):
-        image_path = os.path.join(class_dir, image_name)
-        image_paths.append(image_path)
-        labels.append(idx)
-
 # Instantiate the data generator
-train_generator = CustomImageDataGenerator(image_paths, labels, BATCH_SIZE, IMAGE_SIZE, num_classes=4)
+def get_data_generator(data_dir, batch_size, image_size, num_classes):
+    # Prepare image paths and labels
+    classes = os.listdir(data_dir)
+    image_paths = []
+    labels = []
 
-# Build the CNN model
-model = Sequential([
-    Conv2D(32, (3, 3), activation='relu', input_shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3 + 3 * len(COLORS))),  # original + 3 channels per color mask
-    MaxPooling2D(pool_size=(2, 2)),
-    Conv2D(64, (3, 3), activation='relu'),
-    MaxPooling2D(pool_size=(2, 2)),
-    Flatten(),
-    Dense(128, activation='relu'),
-    Dropout(0.5),
-    Dense(4, activation='softmax')  # 4 classes for the 4 ball colors
-])
+    for idx, class_name in enumerate(classes):
+        class_dir = os.path.join(data_dir, class_name)
+        for image_name in os.listdir(class_dir):
+            image_path = os.path.join(class_dir, image_name)
+            image_paths.append(image_path)
+            labels.append(idx)
 
-# Compile the model
-model.compile(optimizer=Adam(), loss='categorical_crossentropy', metrics=['accuracy'])
-
-# Train the model
-history = model.fit(
-    train_generator,
-    epochs=10,
-    steps_per_epoch=len(train_generator)
-)
-
-# Save the trained model
-model.save('ball_color_classifier_with_color_focus.h5')
+    # Instantiate the data generator
+    return CustomImageDataGenerator(image_paths, labels, batch_size, image_size, num_classes)

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from tensorflow.keras.models import load_model
+from colorCNN import get_data_generator
 
 # Load the trained CNN model
 model = load_model('ball_color_classifier_with_color_focus.h5')
@@ -50,14 +51,20 @@ def calculate_timestamp(frame_number):
 
 # Function to classify the ball color using the CNN
 def classify_ball_color(image):
-    IMAGE_SIZE = (64, 64)  # Same as used in model training
-    image_resized = cv2.resize(image, IMAGE_SIZE)
+    # Resize the image to match the expected input size of your model
+    image_resized = cv2.resize(image, (64, 64))
+    
+    # Prepare the image array and normalize
     image_array = np.array(image_resized) / 255.0
-    image_array = np.expand_dims(image_array, axis=0)
+    image_array = np.expand_dims(image_array, axis=0)  # Add batch dimension
+    
+    # Predict using the model
     predictions = model.predict(image_array)
     predicted_class = np.argmax(predictions)
+    
     # Map the predicted class index to color name
     return list(DRAW_COLORS.keys())[predicted_class]
+
 
 # Function to detect and track balls
 def detect_and_track_balls(frame):
